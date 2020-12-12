@@ -14,10 +14,24 @@ class PegawaiController extends Controller
      */
     public function index(Request $request)
     {
-        $pegawais = Pegawai::all();
-
         if($request->ajax())
         {
+            //Jika request from_date ada value(datanya) maka
+            if(!empty($request->from_date))
+            {
+                if($request->from_date === $request->to_date){
+                    //kita filter tanggalnya sesuai dengan request from_date
+                    $pegawais = Pegawai::whereDate('created_at','=', $request->from_date)->get();
+                }
+                else{
+                    //kita filter dari tanggal awal ke akhir
+                    $pegawais = Pegawai::whereBetween('created_at', array($request->from_date, $request->to_date))->get();
+                }           
+            } 
+            else 
+            {
+                $pegawais = Pegawai::all();
+            }
             return datatables()
                     ->of($pegawais)
                     ->addColumn('action', function($data) {
